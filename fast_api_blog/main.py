@@ -1,7 +1,9 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI,Request
+from fastapi.templating import Jinja2Templates
 
 app=FastAPI()
+
+templates=Jinja2Templates(directory='templates')
 posts: list[dict] = [
     {
         "id": 1,
@@ -74,14 +76,15 @@ posts: list[dict] = [
         "date_posted": "April 29, 2025"
     }
 ]
-@app.get("/",response_class=HTMLResponse,include_in_schema=False)  #to return html response add responseclass = htmlresponse
-@app.get("/posts",response_class=HTMLResponse,include_in_schema=False) #staking decorators so post and root shows the same
-def home():
-    return f"<h1>{posts[0]['content']}</h1>"
+@app.get("/",include_in_schema=False)  #to return html response add responseclass = htmlresponse
+@app.get("/home",include_in_schema=False) #staking decorators so post and root shows the same
+def home(request:Request ):
+    return templates.TemplateResponse(
+        request,
+        "home.html",
+        {"posts":posts, "title":"Home" },
+        )
 
 @app.get("/api/posts")
 def get_post():
     return posts
-
-
-
